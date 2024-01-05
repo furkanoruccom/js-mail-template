@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Jodit Editor with Drag-and-Drop</title>
+    <link rel="stylesheet" href="https://bootswatch.com/5/cerulean/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jodit/3.4.29/jodit.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jodit/3.4.29/jodit.min.js"></script>
+    <style>
+        #dragItem {
+            padding: 5px;
+            border: 1px solid #ccc;
+            display: inline-block;
+            cursor: pointer;
+            background-color: #f0f0f0;
+        }
+
+        #editableDiv {
+            width: 100%;
+            min-height: 150px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow: auto;
+            background-color: #f9f9f9;
+            /* Arka plan rengi */
+            font-size: 20px;
+        }
+
+        .placeholderx {
+
+            /* Rengi kırmızıya çevirdik */
+            background-color: red;
+            color: white;
+            /* Arka plan rengini sarı yaptık */
+            font-weight: bold;
+            /* Metni kalın yaptık */
+            padding: 2px 4px;
+            /* Padding eklendi */
+            border-radius: 4px;
+            /* Kenarları yuvarlak yaptık */
+            margin: 0 2px;
+            /* Margin eklendi */
+            cursor: grab;
+            line-height: 25px;
+        }
+
+        /* Responsive tasarım */
+        @media (max-width: 600px) {
+            #editableDiv {
+                min-height: 100px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5 pt-5">
+        <div id="editor" contenteditable="true" oninput="checkAndRestorePlaceholder()">
+            Merhaba isim alanını istediginiz yere sürükleyerek
+            <span class="placeholderx" contenteditable="false" draggable="true">{isim}</span>
+            yerleştirebilirsiniz
+
+
+        </div>
+    </div>
+    <br>
+
+    <script>
+        var editor = new Jodit('#editor', {
+            // Jodit yapılandırma seçenekleri
+        });
+
+        var draggedElement = null;
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            var placeholder = document.querySelector('.placeholderx');
+            placeholder.addEventListener('dragstart', function (e) {
+                draggedElement = this;
+                e.dataTransfer.setData("text/plain", '{isim}');
+            });
+
+            editor.events.on('drop', function (e) {
+                e.preventDefault();
+                var range, selection;
+                if (document.caretRangeFromPoint) {
+                    range = document.caretRangeFromPoint(e.clientX, e.clientY);
+                } else if (document.caretPositionFromPoint) {
+                    var pos = document.caretPositionFromPoint(e.clientX, e.clientY);
+                    range = document.createRange();
+                    range.setStart(pos.offsetNode, pos.offset);
+                    range.collapse(true);
+                }
+
+                if (range && draggedElement) {
+                    selection = window.getSelection();
+                    range.deleteContents();
+                    range.insertNode(draggedElement);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    draggedElement = null; // Sürüklenen öğeyi sıfırla
+                }
+            });
+
+            var editorElement = document.getElementById('editor');
+            editorElement.addEventListener('dragover', handleDragOver);
+            editorElement.addEventListener('drop', handleEditorDrop);
+        });
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleEditorDrop(e) {
+            e.preventDefault();
+            if (draggedElement) {
+                this.appendChild(draggedElement);
+                draggedElement = null;
+            }
+        }
+
+        function checkAndRestorePlaceholder() {
+            var editorDiv = document.getElementById("editor");
+            if (!editorDiv.innerHTML.includes('{isim}')) {
+                var placeholder = document.createElement("span");
+                placeholder.className = "placeholderx";
+                placeholder.textContent = '{isim}';
+                placeholder.setAttribute("contenteditable", "false");
+                editorDiv.appendChild(placeholder);
+            }
+        }
+    </script>
+</body>
+
+</html>
