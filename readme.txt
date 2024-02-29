@@ -1,1 +1,0 @@
-https://furkanoruccom.github.io/js-mail-template/

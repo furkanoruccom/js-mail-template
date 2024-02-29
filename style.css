@@ -1,0 +1,12 @@
+.fields {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.placeholderx {
+    padding: 5px;
+    margin-right: 10px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    cursor: grab;
+}
